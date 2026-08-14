@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Valkey (Redis-Alternative): In-memory task queue broker for Celery [1]
+  # ----------------------------------------------------------------------------
+  redis:
+    image: docker.io/valkey/valkey:8.0-alpine
+    restart: unless-stopped
+    volumes:
+      - /mnt/user/appdata/paperless-redis:/data
+
+  # ----------------------------------------------------------------------------
+  # 2. Gotenberg: Stateless engine converting Office docs/emails into PDF/A [2]
+  # ----------------------------------------------------------------------------
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8.7
+    restart: unless-stopped
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+      - "--api-timeout=60s" # Increased timeout for large office documents [3]
+
+  # ----------------------------------------------------------------------------
+  # 3. Apache Tika: Engine extracting text layers from complex file formats [2]
+  # ----------------------------------------------------------------------------
+  tika:
+    image: docker.io/apache/tika:latest
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # 4. Paperless-ngx: Core document management system
+  # ----------------------------------------------------------------------------
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - gotenberg
+      - tika
+    ports:
+      - "${PAPERLESS_PORT:-8000}:8000"
+    volumes:
+      - /mnt/user/appdata/paperless-ngx/data:/usr/src/paperless/data
+      - /mnt/user/paperless/media:/usr/src/paperless/media
+      - /mnt/user/paperless/consume:/usr/src/paperless/consume
+      - /mnt/user/paperless/export:/usr/src/paperless/export
+    environment:
+      - PAPERLESS_TIME_ZONE=Europe/Berlin
+      - PAPERLESS_OCR_LANGUAGE=deu+eng # Configures primary languages [4]
+      - PAPERLESS_SECRET_KEY=${PAPERLESS_SECRET_KEY}
+
+      # Unraid Host permission mapping (nobody:users) [5, 6]
+      - USERMAP_UID=99
+      - USERMAP_GID=100
+
+      # Internal Redis connection url [6]
+      - PAPERLESS_REDIS=redis://redis:6379
+
+      # External database connection (mapping to your existing postgresql17 container) [7]
+      - PAPERLESS_DBENGINE=postgresql
+      - PAPERLESS_DBHOST=postgresql17 # Resolved internally via "paperless-net" DNS
+      - PAPERLESS_DBPORT=5432
+      - PAPERLESS_DBNAME=paperless
+      - PAPERLESS_DBUSER=paperless
+      - PAPERLESS_DBPASS=${PAPERLESS_DBPASS}
+
+      # Document Parsing Extensions [7, 8]
+      - PAPERLESS_TIKA_ENABLED=1
+      - PAPERLESS_TIKA_ENDPOINT=http://tika:9998
+      - PAPERLESS_TIKA_GOTENBERG_ENDPOINT=http://gotenberg:3000
+
+      # Native AI Features: Interactive RAG Chat & UI Suggestions [9, 10]
+      - PAPERLESS_AI_ENABLED=1
+      - PAPERLESS_AI_LLM_BACKEND=openai-like
+      - PAPERLESS_AI_LLM_MODEL=${PAPERLESS_AI_MODEL}
+      - PAPERLESS_AI_LLM_ENDPOINT=${PAPERLESS_AI_ENDPOINT}
+      - PAPERLESS_AI_LLM_API_KEY=${PAPERLESS_AI_API_KEY}
+
+  # ----------------------------------------------------------------------------
+  # 5. Paperless-GPT: Offline AI-agent workflow for tagging and classification [11]
+  # ----------------------------------------------------------------------------
+  paperless-gpt:
+    image: icereed/paperless-gpt:latest
+    container_name: paperless-gpt
+    restart: unless-stopped
+    depends_on:
+      - webserver
+    ports:
+      - "${GPT_PORT:-8080}:8080"
+    environment:
+      - PUID=99 # Unraid UID
+      - PGID=100 # Unraid GID
+      - PAPERLESS_BASE_URL=http://webserver:8000 # Direct internal communication
+      - PAPERLESS_API_TOKEN=${PAPERLESS_API_TOKEN}
+      
+      # Ollama backend settings (Local CPU inference)
+      - LLM_PROVIDER=ollama
+      - LLM_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_HOST=${OLLAMA_HOST}
+      - OLLAMA_CONTEXT_LENGTH=4096
+      - TOKEN_LIMIT=2000
+      
+      # Crucial: Disable "Ollama Thinking" mode for structured output tasks.
+      # If thinking remains enabled, reasoning-centric models (e.g., Qwen 3)
+      # can exhaust the context/token limits before providing the JSON response. [12, 13]
+      - OLLAMA_THINK=false
+
+      # Automation pipelines enabled [14]
+      - AUTO_GENERATE_TITLE=true
+      - AUTO_GENERATE_CORRESPONDENT=true
+      - AUTO_GENERATE_DOCUMENT_TYPE=true
+      - AUTO_GENERATE_TAGS=true
+      - AUTO_TAG=paperless-gpt-auto
+    volumes:
+      - /mnt/user/appdata/paperless-gpt/config:/app/config
+      - /mnt/user/appdata/paperless-gpt/prompts:/app/prompts
+
+# Declare our custom driver and bridge name
+networks:
+  default:
+    name: paperless-net
