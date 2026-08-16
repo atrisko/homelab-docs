@@ -11,15 +11,23 @@ Antworte AUSSCHLIESSLICH mit dem erkannten Namen des Korrespondenten (z.B. "Amaz
    - Der Empfänger des Dokuments (z.B. "Alexander Trisko" oder andere Haushaltsmitglieder) ist **NIEMALS** der Korrespondent! Der Korrespondent ist immer die externe Partei (Firma, Behörde, Versicherung, Praxis, Geschäft), die das Dokument ausgestellt hat.
    - Verwende **niemals** den Begriff "Privat" als Korrespondent. Wenn das Dokument an eine Privatperson adressiert ist, ist der Absender dennoch die ausstellende Firma/Institution.
 
-2. **SPEZIALREGEL FÜR AMAZON & MARKETPLACE:**
+2. **BRIEFKOPF SELEKTION (Logo vor Fußzeile):**
+   - Der echte Absender befindet sich fast immer ganz oben im Briefkopf, im Logobereich oder im Absender-Sichtfenster des Umschlags.
+   - **Ignoriere** Firmen, die lediglich im Kleingedruckten der Fußzeile (z. B. "Druckerei-Müller", Bankverbindungen, Softwarelizenzen oder Webhoster) erwähnt werden, es sei denn, sie sind der eigentliche Rechnungssteller.
+
+3. **SPEZIALREGEL FÜR AMAZON & MARKETPLACE:**
    - Wenn das Dokument eine Rechnung, Bestellbestätigung oder Gutschrift von **Amazon** (inklusive Amazon Marketplace) ist, setze den Korrespondenten **IMMER auf "Amazon"**.
    - **Ignoriere** in diesem Fall dritthändlerspezifische Firmennamen von Marketplace-Verkäufern (z.B. "Spigen DE", "Anker Direct" etc.), die im Text als Vertragspartner genannt werden. Der primäre Vertragspartner bzw. die Plattform ist Amazon, daher soll hier einheitlich "Amazon" eingetragen werden.
 
-3. **PRIORISIERUNG EXISTIERENDER KORRESPONDENTEN:**
+4. **PRIORISIERUNG EXISTIERENDER KORRESPONDENTEN:**
    - Gleiche den erkannten Absender zuerst mit der Liste der existierenden Korrespondenten unten ab. Wenn eine passende Firma in der Liste steht (z.B. "Amazon" oder "Tierarztpraxis-Dr-Gille"), verwende exakt diese Schreibweise aus der Liste.
 
-4. **SAUBERE SCHREIBWEISE:**
+5. **SAUBERE SCHREIBWEISE:**
    - Entferne Rechtsformen wie "GmbH", "AG", "S.a.r.l.", "Co. KG" oder "e.V." sowie Adresszusätze aus dem Namen, um die Korrespondentenliste sauber zu halten (z.B. "Deutsche Telekom" statt "Telekom Deutschland GmbH").
+   - Ersetze Leerzeichen und Sonderzeichen durch Bindestriche, falls kein exakter Treffer in den existierenden Korrespondenten gefunden wurde. Schrumpfe aufeinanderfolgende Bindestriche (z.B. `--` zu `-`) zusammen.
+
+6. **BLACK- UND WHITELIST BEACHTEN:**
+   - Ignoriere alle Begriffe aus der Blacklist. Sollte ein Absender auf der Blacklist stehen, versuche den nächstbesseren, echten Absender zu ermitteln oder antworte mit `None`.
 
 ### CONTEXT:
 - Zielsprache: {{.Language}}
