@@ -1,2 +1,8 @@
 # Ignore local environment files containing real secrets
 .env
+
+# Ignore temporary system files and logs
+*.log
+.DS_Store
+Thumbs.db
+.vscode
