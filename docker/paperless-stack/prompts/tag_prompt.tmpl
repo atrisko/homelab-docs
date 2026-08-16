@@ -10,6 +10,8 @@ Hier sind deine inhaltlichen Tags. Wähle immer das spezifischste Tag, wenn es p
 6. Versicherung: `Versicherung`, `Haftpflicht`, `Krankenversicherung`
 7. Wohnen: `Wohnen`, `Anschaffungen`, `Energie`, `Medien`, `Miete`
 
+Die obige Kategorien-Struktur dient nur deiner logischen Orientierung. Deine tatsächliche Ausgabe MUSS zeichengetreu exakt mit Elementen aus der Liste "ERLAUBTE TAGS" übereinstimmen!
+
 ---
 
 ### ERLAUBTE TAGS (Wähle AUSSCHLIESSLICH aus dieser Liste!):
@@ -19,11 +21,13 @@ Hier sind deine inhaltlichen Tags. Wähle immer das spezifischste Tag, wenn es p
 
 ### ENTSCHEIDUNGSREGELN:
 1. Verwende exakt die flachen Namen aus der Liste "ERLAUBTE TAGS" (z.B. `["Technik"]` statt `["Konsum/Technik"]`, oder `["Energie"]` statt `["Wohnen/Energie"]`). Verwende NIEMALS Schrägstriche, es sei denn, ein Tag enthält sie buchstäblich in der Liste "ERLAUBTE TAGS".
-2. Fokus (Maximal 1-2 Tags): Weise einem Dokument nur die am besten passenden Tags zu.
-3. Kein Semantic Bleed:
+2. Fokus (Maximal 1-2 Tags): Weise einem Dokument nur die am besten passenden Tags zu. Weniger ist mehr!
+3. Keine redundanten Hauptkategorien (Hierarchie beachten):
+   Wenn du ein spezifisches Unter-Tag auswählst (z.B. `Fahrrad`, `Befunde`, `Energie`), gib NIEMALS zusätzlich das übergeordnete Haupt-Tag (z.B. `Fahrzeuge`, `Medizin`, `Wohnen`) aus. Wähle ausschließlich das tiefste, spezifischste passende Tag. Die übergeordneten Kategorien werden vom System automatisch im Hintergrund ergänzt.
+4. Kein Semantic Bleed:
    - Tierarzt/Tierbedarf ist KEINE Humanmedizin -> Nutze `Haushalt`, niemals `Befunde` oder `Rezepte`.
    - Rechnungen der Krankenversicherung gehören zu `Krankenversicherung` -> niemals zu `Befunde` oder `Rezepte`.
-4. Handhabung unklarer Dokumente:
+5. Handhabung unklarer Dokumente:
    - Wenn es sich um eine Rechnung, einen Kaufbeleg oder eine Quittung handelt, deren genauer Inhalt oder Zweck unklar, verschwommen oder nicht genauer zuordenbar ist, weise das Tag `"Sonstige"` zu.
    - Wenn das Dokument überhaupt keinem Thema oder Belegcharakter zugeordnet werden kann, antworte mit einem leeren Array: `[]`.
    - Erfinde NIEMALS neue Tags.
