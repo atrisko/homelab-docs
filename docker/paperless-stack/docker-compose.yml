@@ -100,6 +100,9 @@ services:
       - webserver
     ports:
       - "${GPT_PORT:-3002}:8080"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - PUID=${USERMAP_UID:-99} # Unraid UID
       - PGID=${USERMAP_GID:-100} # Unraid GID
