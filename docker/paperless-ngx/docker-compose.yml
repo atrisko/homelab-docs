@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ----------------------------------------------------------------------------
   # 1. Valkey (Redis-Alternative): In-memory task queue broker for Celery [1]
@@ -44,7 +42,7 @@ services:
     volumes:
       - /mnt/user/appdata/paperless-ngx/data:/usr/src/paperless/data
       - /mnt/user/paperless/media:/usr/src/paperless/media
-      - /mnt/user/paperless/consume:/usr/src/paperless/consume
+      - /mnt/user/paperless-consume:/usr/src/paperless/consume
       - /mnt/user/paperless/export:/usr/src/paperless/export
     environment:
       - PAPERLESS_TIME_ZONE=Europe/Berlin
@@ -67,16 +65,21 @@ services:
       - PAPERLESS_DBPASS=${PAPERLESS_DBPASS}
 
       # Document Parsing Extensions [7, 8]
-      - PAPERLESS_TIKA_ENABLED=1
+      - PAPERLESS_TIKA_ENABLED=true
       - PAPERLESS_TIKA_ENDPOINT=http://tika:9998
       - PAPERLESS_TIKA_GOTENBERG_ENDPOINT=http://gotenberg:3000
 
       # Native AI Features: Interactive RAG Chat & UI Suggestions [9, 10]
-      - PAPERLESS_AI_ENABLED=1
+      - PAPERLESS_AI_ENABLED=true
       - PAPERLESS_AI_LLM_BACKEND=openai-like
       - PAPERLESS_AI_LLM_MODEL=${PAPERLESS_AI_MODEL}
       - PAPERLESS_AI_LLM_ENDPOINT=${PAPERLESS_AI_ENDPOINT}
       - PAPERLESS_AI_LLM_API_KEY=${PAPERLESS_AI_API_KEY}
+      - PAPERLESS_AI_LLM_EMBBEDDING_BACKEND=huggingface
+
+      # Directory Routing for OCR
+      - PAPERLESS_CONSUMER_RECURSIVE=true
+      - PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS=true
 
   # ----------------------------------------------------------------------------
   # 5. Paperless-GPT: Offline AI-agent workflow for tagging and classification [11]
@@ -94,6 +97,7 @@ services:
       - PGID=100 # Unraid GID
       - PAPERLESS_BASE_URL=http://webserver:8000 # Direct internal communication
       - PAPERLESS_API_TOKEN=${PAPERLESS_API_TOKEN}
+      - PDF_SKIP_EXISTING_OCR=true
       
       # Ollama backend settings (Local CPU inference)
       - LLM_PROVIDER=ollama
@@ -101,18 +105,35 @@ services:
       - OLLAMA_HOST=${OLLAMA_HOST}
       - OLLAMA_CONTEXT_LENGTH=4096
       - TOKEN_LIMIT=2000
-      
+
+
       # Crucial: Disable "Ollama Thinking" mode for structured output tasks.
       # If thinking remains enabled, reasoning-centric models (e.g., Qwen 3)
       # can exhaust the context/token limits before providing the JSON response. [12, 13]
       - OLLAMA_THINK=false
 
-      # Automation pipelines enabled [14]
+       # Vision / iGPU OCR settings
+      - OCR_PROVIDER=llm
+      - VISION_LLM_PROVIDER=ollama
+      - VISION_LLM_MODEL=minicpm-v
+      - AUTO_OCR_TAG=paperless-gpt-ocr-auto
+      - PDF_OCR_TAGGING=true
+      - PDF_UPLOAD=false
+      - PDF_OCR_COMPLETE_TAG=paperless-gpt-ocr-complete
+
+      # Automation pipelines enabled
       - AUTO_GENERATE_TITLE=true
-      - AUTO_GENERATE_CORRESPONDENT=true
+      - AUTO_GENERATE_CORRESPONDENTS=true
       - AUTO_GENERATE_DOCUMENT_TYPE=true
       - AUTO_GENERATE_TAGS=true
+      - CREATE_NEW_TAGS=false
       - AUTO_TAG=paperless-gpt-auto
+
+      # iGPU-Optimization: reduce file size
+      - IMAGE_MAX_RENDER_DPI=150          # Standard: 600
+      - IMAGE_MAX_PIXEL_DIMENSION=2000    # Standard: 10000
+      - IMAGE_MAX_TOTAL_PIXELS=4000000
+
     volumes:
       - /mnt/user/appdata/paperless-gpt/config:/app/config
       - /mnt/user/appdata/paperless-gpt/prompts:/app/prompts
