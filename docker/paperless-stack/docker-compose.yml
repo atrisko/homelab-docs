@@ -81,6 +81,7 @@ services:
       - PAPERLESS_CONSUMER_RECURSIVE=true
       - PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS=true
 
+
   # ----------------------------------------------------------------------------
   # 5. Paperless-GPT: Offline AI-agent workflow for tagging and classification [11]
   # ----------------------------------------------------------------------------
