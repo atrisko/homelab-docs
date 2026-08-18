@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 # ----------------------------------------------------------------------
 # Backup script for Paperless-ngx & PostgreSQL on Konstantin (Unraid)
 # Stores consistent database dumps locally and syncs everything encrypted to Hetzner
