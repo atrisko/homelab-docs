@@ -18,10 +18,19 @@ Fahrzeuge, Fahrrad, Finanzen, Bank, Investitionen, Steuer, Konsum, Freizeit, Hau
 ---
 
 ### ENTSCHEIDUNGSREGELN:
-1. Verwende exakt die flachen Namen aus der Liste "ERLAUBTE TAGS".
+1. Wähle passende Tags AUSSCHLIESSLICH aus der Liste "ERLAUBTE TAGS" oben. Erfinde NIEMALS neue Tags.
 2. Fokus (Maximal 1-2 Tags): Weise einem Dokument nur die am besten passenden Tags zu. Weniger ist mehr!
-3. Handhabung unklarer Dokumente: Wenn das Dokument unklar ist, wähle "Sonstiges".
-4. Erfinde NIEMALS neue Tags. Verwende keine Hierarchie-Pfade (keine Schrägstriche).
+3. Keine redundanten Hauptkategorien (Hierarchie beachten):
+   Wenn du ein spezifisches Unter-Tag auswählst (z.B. Fahrrad, Befunde, Energie), gib NIEMALS zusätzlich das übergeordnete Haupt-Tag (z.B. Fahrzeuge, Medizin, Wohnen) aus. Wähle ausschließlich das tiefste, spezifischste passende Tag. Bevorzuge immer das spezifischere Unter-Tag (z.B. "Steuer" oder "Abo") anstelle des allgemeinen Oberbegriffs ("Finanzen" oder "Konsum"), falls es in der Liste der ERLAUBTEN TAGS existiert.
+4. Kein Semantic Bleed & Trennung von Themen:
+   - Tierarzt/Tierbedarf ist KEINE Humanmedizin -> Nutze Haushalt (oder das entsprechende Haushalt-Tag), niemals Befunde oder Rezepte.
+   - Rechnungen der Krankenversicherung gehören zu Krankenversicherung -> niemals zu Befunde oder Rezepte.
+   - **Finanzen vs. Konsum (inkl. jeweiliger Unterkategorien):** 
+     - **Finanzen und dessen Unterkategorien** (z. B. Steuer, Bank, Investitionen etc.) werden NUR für reine Finanz-, Steuer- und Bankangelegenheiten verwendet.
+     - **Konsum und dessen Unterkategorien** (z. B. Technik, Haushalt etc.) werden für ALLE gewöhnlichen Rechnungen, Quittungen, Kaufbelege und Verträge des täglichen Bedarfs verwendet. Dies schließt ausdrücklich Software-Lizenzen, Server-Hosting, Cloud-Kosten (wie Rechnungen von Mistral AI, OpenAI, Hetzner), Online-Einkäufe und Abonnements ein. Solche Rechnungen gehören NIEMALS zu "Finanzen" oder dessen Unterkategorien, nur weil dort Steuerbeträge oder Zahlungsinformationen stehen!
+5. Handhabung unklarer Dokumente:
+   - Wenn es sich um eine Rechnung, einen Kaufbeleg oder eine Quittung handelt, deren genauer Inhalt oder Zweck unklar ist, weise das Tag "Sonstige" (oder "Konsum/Sonstige" bzw. "konsum") zu.
+   - Wenn das Dokument überhaupt keinem Thema zugeordnet werden kann, gib nichts aus.
 
 
 ---
