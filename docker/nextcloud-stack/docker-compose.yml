@@ -1,0 +1,86 @@
+# compose.yaml
+# Production-ready Nextcloud Stack with separate Redis caching and Cron services
+
+services:
+  nextcloud-app:
+    # Pinning the major version is required to prevent unexpected upgrades and database schema breaks
+    image: nextcloud:30-apache
+    container_name: nextcloud-app
+    restart: unless-stopped
+    ports:
+      # Exposition of the web server port. Bound to a variable, defaulting to 8080 on the host
+      - "${NC_PORT:-8080}:80"
+    volumes:
+      # Core application data: Must reside on a fast SSD/NVMe cache pool to avoid FUSE latency overhead
+      - ${NC_APPDATA_PATH:-/mnt/cache/appdata/nextcloud}/html:/var/www/html
+      - ${NC_APPDATA_PATH:-/mnt/cache/appdata/nextcloud}/config:/var/www/html/config
+      - ${NC_APPDATA_PATH:-/mnt/cache/appdata/nextcloud}/custom_apps:/var/www/html/custom_apps
+      # User storage: Safe to map directly to the main HDD array (unRAID user share)
+      - ${NC_DATA_PATH:-/mnt/user/nextcloud_data}:/var/www/html/data
+    environment:
+      # PostgreSQL database connection (Points to the existing database container)
+      - POSTGRES_HOST=${DB_HOST}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+      # Redis container hostname (Docker DNS handles internal routing seamlessly)
+      - REDIS_HOST=nextcloud-redis
+
+      # Initial Admin credentials (Utilized only during first run/initialization)
+      - NEXTCLOUD_ADMIN_USER=${NC_ADMIN_USER}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NC_ADMIN_PASSWORD}
+
+      # Allowed connection URLs/IPs (Required for trusted_domains configuration)
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NC_TRUSTED_DOMAINS}
+
+      # Pre-configuration for HTTPS handling (Crucial for later Reverse Proxy transition)
+      - OVERWRITEPROTOCOL=https
+
+      # Performance Tuning: Match PHP upload parameters to support larger files
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_UPLOAD_LIMIT=10G
+    depends_on:
+      nextcloud-redis:
+        condition: service_started
+    networks:
+      - database-network
+
+  nextcloud-redis:
+    # Dedicated cache instance to avoid single-thread bottlenecks with other apps like Paperless
+    image: redis:7-alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly no
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    # Note: Disabling appendonly prevents disk logging, extending SSD lifespan on unRAID cache pools.
+    # Limitation of Redis RAM allocation with Least-Recently-Used eviction when capacity is reached.
+    networks:
+      - database-network
+
+  nextcloud-cron:
+    # Official Nextcloud Cron runner. Bypasses unoptimized web/AJAX execution.
+    image: nextcloud:30-apache
+    container_name: nextcloud-cron
+    restart: unless-stopped
+    entrypoint: /cron.sh
+    volumes:
+      # Mirroring the exact volume mounts of the application container is required to run background tasks on files
+      - ${NC_APPDATA_PATH:-/mnt/cache/appdata/nextcloud}/html:/var/www/html
+      - ${NC_APPDATA_PATH:-/mnt/cache/appdata/nextcloud}/config:/var/www/html/config
+      - ${NC_APPDATA_PATH:-/mnt/cache/appdata/nextcloud}/custom_apps:/var/www/html/custom_apps
+      - ${NC_DATA_PATH:-/mnt/user/nextcloud_data}:/var/www/html/data
+    depends_on:
+      - nextcloud-app
+    networks:
+      - database-network
+
+networks:
+  database-network:
+    # Name of the pre-existing Docker network where the PostgreSQL container runs.
+    # Verification is possible via 'docker network ls' or the Unraid Docker Settings.
+    name: ${DOCKER_NETWORK:-nextcloud-net}
+    external: true
