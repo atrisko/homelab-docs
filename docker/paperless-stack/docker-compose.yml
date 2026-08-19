@@ -55,13 +55,15 @@ services:
       - PAPERLESS_OCR_LANGUAGE=${PAPERLESS_OCR_LANGUAGE:-deu+eng} # Configures primary languages
       - PAPERLESS_SECRET_KEY=${PAPERLESS_SECRET_KEY}
       - PAPERLESS_CONSUMER_POLLING_INTERVAL=${PAPERLESS_CONSUMER_POLLING_INTERVAL:-10}
+      - PAPERLESS_CSRF_TRUSTED_ORIGINS=${PAPERLESS_CSRF_TRUSTED_ORIGINS}
+
       # Unraid Host permission mapping (nobody:users)
       - USERMAP_UID=${USERMAP_UID:-99}
       - USERMAP_GID=${USERMAP_GID:-100}
-      
+
       # Internal Redis connection url
       - PAPERLESS_REDIS=redis://redis:6379
-      
+
       # External database connection (mapping to your existing postgresql17 container)
       - PAPERLESS_DBENGINE=postgresql
       - PAPERLESS_DBHOST=${PAPERLESS_DBHOST:-postgresql17} # Resolved internally via "paperless-net" DNS
@@ -69,12 +71,12 @@ services:
       - PAPERLESS_DBNAME=${PAPERLESS_DBNAME:-paperless}
       - PAPERLESS_DBUSER=${PAPERLESS_DBUSER:-paperless}
       - PAPERLESS_DBPASS=${PAPERLESS_DBPASS}
-      
+
       # Document Parsing Extensions
       - PAPERLESS_TIKA_ENABLED=true
       - PAPERLESS_TIKA_ENDPOINT=http://tika:9998
       - PAPERLESS_TIKA_GOTENBERG_ENDPOINT=http://gotenberg:3000
-      
+
       # Native AI Features: Interactive RAG Chat & UI Suggestions
       - PAPERLESS_AI_ENABLED=true
       - PAPERLESS_AI_LLM_BACKEND=openai-like
@@ -82,7 +84,7 @@ services:
       - PAPERLESS_AI_LLM_ENDPOINT=${PAPERLESS_AI_ENDPOINT}
       - PAPERLESS_AI_LLM_API_KEY=${PAPERLESS_AI_API_KEY}
       - PAPERLESS_AI_LLM_EMBBEDDING_BACKEND=huggingface
-      
+
       # Directory Routing for OCR
       - PAPERLESS_CONSUMER_RECURSIVE=true
       - PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS=true
@@ -109,31 +111,32 @@ services:
       - PAPERLESS_BASE_URL=http://webserver:8000 # Direct internal communication
       - PAPERLESS_API_TOKEN=${PAPERLESS_API_TOKEN}
       - PDF_SKIP_EXISTING_OCR=true
-      
+
       # Dynamic LLM Provider Configuration
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
-      - LLM_MODEL=${LLM_MODEL:-qwen3:8b}
-      
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - LLM_MODEL=${LLM_MODEL:-mistral/mistral-small-latest}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+
       # Local Ollama Backend Settings
       - OLLAMA_HOST=${OLLAMA_HOST:-}
       - OLLAMA_CONTEXT_LENGTH=${OLLAMA_CONTEXT_LENGTH:-4096}
       - TOKEN_LIMIT=${TOKEN_LIMIT:-2000}
       - OLLAMA_THINK=${OLLAMA_THINK:-false} # Disabled reasoning for structured tasks
-      
-      # Cloud/Commercial LLM Backend Settings (Requesty, OpenAI, Gemini)
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
-      - GOOGLEAI_API_KEY=${GOOGLEAI_API_KEY:-}
-      
-      # Vision / iGPU OCR settings
-      - OCR_PROVIDER=${OCR_PROVIDER:-llm}
-      - VISION_LLM_PROVIDER=${VISION_LLM_PROVIDER:-ollama}
-      - VISION_LLM_MODEL=${VISION_LLM_MODEL:-minicpm-v}
+
+      # Direct OCR Provider (via direktem Mistral API-Key)
+      - OCR_PROVIDER=${OCR_PROVIDER:-mistral_ocr}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+      - OCR_PROCESS_MODE=${OCR_PROCESS_MODE:-whole_pdf}
+      - MISTRAL_MODEL=${MISTRAL_MODEL:-mistral-ocr-latest}
+
+      #Tag queue and error handling:
       - AUTO_OCR_TAG=${AUTO_OCR_TAG:-paperless-gpt-ocr-auto}
       - PDF_OCR_TAGGING=${PDF_OCR_TAGGING:-true}
       - PDF_UPLOAD=${PDF_UPLOAD:-false}
       - PDF_OCR_COMPLETE_TAG=${PDF_OCR_COMPLETE_TAG:-paperless-gpt-ocr-complete}
-      
+      - FAIL_TAG=${FAIL_TAG:-paperless-gpt-failed}
+
       # Automation pipelines enabled
       - AUTO_GENERATE_TITLE=${AUTO_GENERATE_TITLE:-true}
       - AUTO_GENERATE_CORRESPONDENTS=${AUTO_GENERATE_CORRESPONDENTS:-true}
@@ -141,7 +144,7 @@ services:
       - AUTO_GENERATE_TAGS=${AUTO_GENERATE_TAGS:-true}
       - CREATE_NEW_TAGS=${CREATE_NEW_TAGS:-false}
       - AUTO_TAG=${AUTO_TAG:-paperless-gpt-auto}
-      
+
       # iGPU-Optimization: reduce file size
       - IMAGE_MAX_RENDER_DPI=${IMAGE_MAX_RENDER_DPI:-150} # Standard: 600
       - IMAGE_MAX_PIXEL_DIMENSION=${IMAGE_MAX_PIXEL_DIMENSION:-2000} # Standard: 10000
