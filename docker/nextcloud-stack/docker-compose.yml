@@ -4,7 +4,7 @@
 services:
   nextcloud-app:
     # Pinning the major version is required to prevent unexpected upgrades and database schema breaks
-    image: nextcloud:30-apache
+    image: nextcloud:31-apache
     container_name: nextcloud-app
     restart: unless-stopped
     ports:
@@ -63,7 +63,7 @@ services:
 
   nextcloud-cron:
     # Official Nextcloud Cron runner. Bypasses unoptimized web/AJAX execution.
-    image: nextcloud:30-apache
+    image: nextcloud:31-apache
     container_name: nextcloud-cron
     restart: unless-stopped
     entrypoint: /cron.sh
