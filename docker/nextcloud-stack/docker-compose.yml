@@ -35,7 +35,7 @@ services:
       - NEXTCLOUD_TRUSTED_DOMAINS=${NC_TRUSTED_DOMAINS}
 
       # Pre-configuration for HTTPS handling (Crucial for later Reverse Proxy transition)
-      - OVERWRITEPROTOCOL=https
+      - OVERWRITEPROTOCOL=http
 
       # Performance Tuning: Match PHP upload parameters to support larger files
       - PHP_MEMORY_LIMIT=1024M
